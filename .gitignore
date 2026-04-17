@@ -1,0 +1,19 @@
+# Xcode / Swift
+DerivedData/
+.build/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store
+
+# Secrets / local config
+.env
+.env.*
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc

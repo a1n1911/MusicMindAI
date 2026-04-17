@@ -1,0 +1,33 @@
+# music migration flow: источник → яндекс.музыка
+
+## источники треков
+- **SoundCloud**: OAuth, track_likes → треки (title, artists)
+- **VK Музыка**: токен + user-agent (vkpymusic), audio.get по owner_id → треки (title, artist, duration). Токен: `cd vkpymusic && pip install -r requirements.txt && python examples/receive_token_example.py` → config_vk.ini или вывод в консоль.
+
+## вход
+- трек из источника (soundcloud / VK / другой сервис): **title** + **artists**
+- пример: `"effloresce"` + `"nleave, iseethesky"` → поисковый текст: `"effloresce nleave, iseethesky"`
+
+## шаг 1: поиск в яндексе
+- **GET** `https://api.music.yandex.ru/search/instant/mixed`
+- query: `text` = url-encoded строка (title + artists), `type` = album,artist,playlist,track,..., `filter` = track, `pageSize` = 36
+- заголовки: те же что в YandexMusicService (User-Agent, Cookie, x-yandex-music-multi-auth-user-id, Referer, x-yandex-music-client и т.д.)
+
+ответ:
+- `results[]` — массив, элементы с `type: "track"` и вложенным `track`:
+  - `track.id` — id трека (число)
+  - `track.albums[0].id` — id альбома (для лайка нужен формат trackId:albumId)
+
+## шаг 2: добавить в лайки (плейлист «Мне нравится»)
+- **POST** `https://api.music.yandex.ru/users/{userId}/likes/tracks/add?track-id={trackId}:{albumId}`
+- пример: `track-id=140631705:37246656`
+- тело пустое, те же заголовки + Cookie, userId в path и в заголовке x-yandex-music-multi-auth-user-id
+
+результат: трек появляется в плейлисте «Мне нравится».
+
+## edge cases
+- поиск вернул 0 результатов → пропустить или залогировать
+- несколько результатов → брать первый (или матчить по title/artists точнее)
+## реализация
+- в **YandexMusicService**: методы `searchTrack(query:cookies:userId:)` → `(trackId, albumId)?` и `addTrackToLikes(trackId:albumId:cookies:userId:)` 
+- высокоуровневый flow миграции: для каждого `Track` из источника собрать `"\(title) \(artists)"` → search → add to likes (с паузой/rate limit при необходимости)

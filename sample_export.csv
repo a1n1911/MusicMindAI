@@ -1,0 +1,4 @@
+ID,Title,Artists,Duration (ms),Duration (formatted),Album ID,Cover URI,Available,Yandex URL
+123-Song One-Artist One,Song One,Artist One,180000,3:00,456,https://example.com/cover1.jpg,true,https://music.yandex.ru/album/456/track/123
+124-Song Two-Artist Two,Song Two,Artist Two,240000,4:00,457,https://example.com/cover2.jpg,true,https://music.yandex.ru/album/457/track/124
+125-"Song, with comma"-Artist Three,Song with comma,Artist Three,210000,3:30,458,https://example.com/cover3.jpg,false,https://music.yandex.ru/album/458/track/125
